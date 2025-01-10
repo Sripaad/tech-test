@@ -1,0 +1,268 @@
+{
+    "test_queries": [
+      {
+        "query_string": "Example Query: Get total number of orders",
+        "query": {
+          "metrics": ["order_count"]
+        },
+        "semantic_layer_definition": {
+          "metrics": [
+            {
+              "name": "order_count",
+              "sql": "COUNT(*)",
+              "table": "orders"
+            }
+          ]
+        },
+        "solution": "SELECT COUNT(*) AS total_revenue \nFROM orders"
+      },
+      {
+        "query_string": "Give me the total sales revenue",
+        "query": {
+          "metrics": ["total_revenue"]
+        },
+        "semantic_layer_definition": {
+          "metrics": [
+            {
+              "name": "total_revenue",
+              "sql": "SUM(sale_price)",
+              "table": "order_items"
+            }
+          ]
+        }
+      },
+      {
+        "query_string": "Give me sales revenue by order item status",
+        "query": {
+          "metrics": ["total_revenue"],
+          "dimensions": ["status"]
+        },
+        "semantic_layer_definition": {
+          "metrics": [
+            {
+              "name": "total_revenue",
+              "sql": "SUM(sale_price)",
+              "table": "order_items"
+            }
+          ],
+          "dimensions": [
+            {
+              "name": "status",
+              "sql": "status",
+              "table": "order_items"
+            }
+          ]
+        }
+      },
+      {
+        "query_string": "Show me the sales revenue for order items with status complete",
+        "query": {
+          "metrics": ["total_revenue"],
+          "filters": [
+            {
+              "field": "status",
+              "operator": "=",
+              "value": "Complete"
+            }
+          ]
+        },
+        "semantic_layer_definition": {
+          "metrics": [
+            {
+              "name": "total_revenue",
+              "sql": "SUM(sale_price)",
+              "table": "order_items"
+            }
+          ],
+          "dimensions": [
+            {
+              "name": "status",
+              "sql": "status",
+              "table": "order_items"
+            }
+          ]
+        }
+      },
+      {
+        "query_string": "Show me the number of orders with more than 1 items",
+        "query": {
+          "metrics": ["count_of_orders"],
+          "filters": [
+            {
+              "field": "num_of_item",
+              "operator": ">",
+              "value": 1
+            }
+          ]
+        },
+        "semantic_layer_definition": {
+          "metrics": [
+            {
+              "name": "count_of_orders",
+              "sql": "COUNT(order_id)",
+              "table": "orders"
+            }
+          ],
+          "dimensions": [
+            {
+              "name": "num_of_item",
+              "sql": "num_of_item",
+              "table": "orders"
+            }
+          ]
+        }
+      },
+      {
+        "query_string": "Show me the number of complete orders made by women",
+        "query": {
+          "metrics": ["count_of_orders"],
+          "filters": [
+            {
+              "field": "status",
+              "operator": "=",
+              "value": "Complete"
+            },
+            {
+              "field": "gender",
+              "operator": "=",
+              "value": "F"
+            }
+          ]
+        },
+        "semantic_layer_definition": {
+          "metrics": [
+            {
+              "name": "count_of_orders",
+              "sql": "COUNT(order_id)",
+              "table": "orders"
+            }
+          ],
+          "dimensions": [
+            {
+              "name": "num_of_item",
+              "sql": "num_of_item",
+              "table": "orders"
+            },
+            {
+              "name": "gender",
+              "sql": "gender",
+              "table": "orders"
+            },
+            {
+              "name": "status",
+              "sql": "status",
+              "table": "orders"
+            }
+          ]
+        }
+      },
+      {
+        "query_string": "Show me the revenue from orders with a value over $1000",
+        "query": {
+          "metrics": ["total_revenue"],
+          "dimensions": ["order_id"],
+          "filters": [
+            {
+              "field": "total_revenue",
+              "operator": ">",
+              "value": 1000
+            }
+          ]
+        },
+        "semantic_layer_definition": {
+          "metrics": [
+            {
+              "name": "total_revenue",
+              "sql": "SUM(sale_price)",
+              "table": "order_items"
+            }
+          ],
+          "dimensions": [
+            {
+              "name": "order_id",
+              "sql": "order_id",
+              "table": "order_items"
+            }
+          ]
+        }
+      },
+      {
+        "query_string": "Show me order details for orders over $1000 in value",
+        "query": {
+          "metrics": ["total_revenue"],
+          "dimensions": ["order_id", "gender", "status"],
+          "filters": [
+            {
+              "field": "total_revenue",
+              "operator": ">",
+              "value": 1000
+            }
+          ]
+        },
+        "semantic_layer_definition": {
+          "metrics": [
+            {
+              "name": "total_revenue",
+              "sql": "SUM(sale_price)",
+              "table": "order_items"
+            }
+          ],
+          "dimensions": [
+            {
+              "name": "order_id",
+              "sql": "order_id",
+              "table": "order_items"
+            },
+            {
+              "name": "gender",
+              "sql": "gender",
+              "table": "orders"
+            },
+            {
+              "name": "status",
+              "sql": "status",
+              "table": "orders"
+            }
+          ],
+          "joins": [
+            {
+              "one": "orders",
+              "many": "order_items",
+              "join": "order_items.order_id = orders.order_id"
+            }
+          ]
+        }
+      },
+      {
+        "query_string": "Show me sales revenue by week",
+        "query": {
+          "metrics": ["total_revenue"],
+          "dimensions": ["ordered_date__week"]
+        },
+        "semantic_layer_definition": {
+          "metrics": [
+            {
+              "name": "total_revenue",
+              "sql": "SUM(sale_price)",
+              "table": "order_items"
+            }
+          ],
+          "dimensions": [
+            {
+              "name": "ordered_date",
+              "sql": "created_at",
+              "table": "orders"
+            }
+          ],
+          "joins": [
+			    { 
+    		  "one": "orders",
+    		  "many": "order_items",
+    		  "join": "order_items.order_id = orders.order_id"
+  			  }
+		  ]
+        }
+      }
+    ]
+  }
+  

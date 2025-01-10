@@ -1,0 +1,206 @@
+{
+    "test_queries": [
+      {
+        "query_string": "Calculate total revenue and average sale price per product category for products distributed from Chicago IL and Houston TX",
+        "query": {
+          "metrics": ["total_revenue", "average_sale_price", "units_sold"],
+          "dimensions": ["product_category"]
+        },
+        "semantic_layer_definition": {
+          "metrics": [
+            {
+              "name": "total_revenue",
+              "sql": "SUM(order_items.sale_price)",
+              "table": "order_items"
+            },
+            {
+              "name": "average_sale_price",
+              "sql": "AVG(order_items.sale_price)",
+              "table": "order_items"
+            },
+            {
+              "name": "units_sold",
+              "sql": "COUNT(order_items.id)",
+              "table": "order_items"
+            }
+          ],
+          "dimensions": [
+            {
+              "name": "product_category",
+              "sql": "category",
+              "table": "products"
+            }
+          ],
+          "joins": [
+            {
+              "one": "order_items",
+              "many": "products",
+              "join": "order_items.product_id = products.id"
+            },
+            {
+              "one": "products",
+              "many": "distribution_centers",
+              "join": "products.distribution_center_id = distribution_centers.id"
+            }
+          ],
+          "filters": [
+            {
+              "field": "distribution_centers.name",
+              "operator": "IN",
+              "value": ["Chicago IL", "Houston TX"]
+            }
+          ]
+        }
+      },
+      {
+        "query_string": "Determine the monthly number of orders and average number of items per order, segmented by gender, for orders placed after 2023",
+        "query": {
+          "metrics": ["total_orders", "avg_items_per_order"],
+          "dimensions": ["ordered_date__month", "gender"],
+          "filters": [
+            {
+              "field": "created_at",
+              "operator": ">=",
+              "value": "2023-01-01"
+            },
+            {
+              "field": "created_at",
+              "operator": "<",
+              "value": "2024-01-01"
+            }
+          ]
+        },
+        "semantic_layer_definition": {
+          "metrics": [
+            {
+              "name": "total_orders",
+              "sql": "COUNT(order_id)",
+              "table": "orders"
+            },
+            {
+              "name": "avg_items_per_order",
+              "sql": "AVG(num_of_item)",
+              "table": "orders"
+            }
+          ],
+          "dimensions": [
+            {
+              "name": "ordered_date",
+              "sql": "created_at",
+              "table": "orders"
+            },
+            {
+              "name": "gender",
+              "sql": "gender",
+              "table": "orders"
+            }
+          ]
+        }
+      },
+      {
+        "query_string": "Calculate the average number of items per order for users from Brazil who made orders in the last six months",
+        "query": {
+          "metrics": ["avg_items_per_order"],
+          "dimensions": ["country"],
+          "filters": [
+            {
+              "field": "country",
+              "operator": "=",
+              "value": "Brasil"
+            },
+            {
+              "field": "created_at",
+              "operator": ">=",
+              "value": "2024-07-01"
+            }
+          ]
+        },
+        "semantic_layer_definition": {
+          "metrics": [
+            {
+              "name": "avg_items_per_order",
+              "sql": "AVG(num_of_item)",
+              "table": "orders"
+            }
+          ],
+          "dimensions": [
+            {
+              "name": "country",
+              "sql": "country",
+              "table": "users"
+            },
+            {
+              "name": "created_at",
+              "sql": "created_at",
+              "table": "orders"
+            }
+          ],
+          "joins": [
+            {
+              "one": "orders",
+              "many": "users",
+              "join": "orders.user_id = users.id"
+            }
+          ]
+        }
+      },
+      {
+        "query_string": "Identify the top 5 users who have spent the most on Accessories products, including their first name, last name, and total spend",
+        "query": {
+          "metrics": ["total_spend"],
+          "dimensions": ["first_name", "last_name"],
+          "filters": [
+            {
+              "field": "product_category",
+              "operator": "=",
+              "value": "Accessories"
+            }
+          ],
+          "limit": 5,
+          "order_by": {
+            "field": "total_spend",
+            "direction": "DESC"
+          }
+        },
+        "semantic_layer_definition": {
+          "metrics": [
+            {
+              "name": "total_spend",
+              "sql": "SUM(order_items.sale_price)",
+              "table": "order_items"
+            }
+          ],
+          "dimensions": [
+            {
+              "name": "first_name",
+              "sql": "first_name",
+              "table": "users"
+            },
+            {
+              "name": "last_name",
+              "sql": "last_name",
+              "table": "users"
+            },
+            {
+              "name": "product_category",
+              "sql": "category",
+              "table": "products"
+            }
+          ],
+          "joins": [
+            {
+              "one": "order_items",
+              "many": "users",
+              "join": "order_items.user_id = users.id"
+            },
+            {
+              "one": "order_items",
+              "many": "products",
+              "join": "order_items.product_id = products.id"
+            }
+          ]
+        }
+      }
+    ]
+  }
+  
